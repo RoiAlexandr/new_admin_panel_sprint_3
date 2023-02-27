@@ -3,14 +3,7 @@ import json
 
 class Transformer:
     def transform(self, extracted_part: dict) -> list[dict]:
-        """
-        Обработка данных из Postgres и преобразование в формат для ElasticSearch
-
-        Args:
-            extracted_part (dict): кусочек данных из Postgres
-        Returns:
-            list[dict]: возвращаем преобразованные данные в виде списка словарей для ElasticSearch
-        """
+        """Обработка данных из Postgres и преобразование в формат для ElasticSearch"""
 
         transformed_part = []
         for row in extracted_part:

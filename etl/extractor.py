@@ -57,7 +57,7 @@ class Extractor:
                 if not rows:
                     self.logger.info('изменений не найдено')
                     break
-                self.logger.info(f'извлечено {len(rows)} строк')
+                self.logger.info('извлечено %s строк', len(rows))
                 for data in rows:
                     ids_list = self.state.get_state("filmwork_ids")
                     ids_list.append(data['id'])

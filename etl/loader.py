@@ -1,5 +1,3 @@
-import json
-
 import elasticsearch.exceptions
 from elasticsearch import helpers, ConnectionError
 
@@ -128,12 +126,10 @@ class Loader:
                 raise elasticsearch.exceptions.ConnectionError
             if not es.indices.exists(index='movies'):
                 es.indices.create(index=index_name, settings=settings, mappings=mappings)
-                self.logger.info(f"Создание индекса {index_name} со следующими схемами:"
-                                 f"{json.dumps(settings, indent=2)} и {json.dumps(mappings, indent=2)} ")
 
     def load(self, data: list[dict]) -> None:
         """Загружаем данные пачками в ElasticSearch"""
         actions = [{'_index': 'movies', '_id': row['id'], '_source': row, } for row in data]
         with elastic_search_connection(self.dsn) as es:
             helpers.bulk(es, actions)
-            self.logger.info(f'загружено {len(data)} строк')
+            self.logger.info('загружено %s строк', len(data))

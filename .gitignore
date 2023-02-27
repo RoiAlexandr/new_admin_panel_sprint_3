@@ -136,8 +136,8 @@ GitHub.sublime-settings
 !.vscode/extensions.json
 .history
 
-/etl/simple_project/app/sqlite_to_postgres/load_data.log
-etl/simple_project/postgres_to_es/state.json
+etl/load_data.log
+etl/state.json
 .vscode/settings.json
 .idea/misc.xml
 .idea/inspectionProfiles/Project_Default.xml
