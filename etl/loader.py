@@ -1,24 +1,21 @@
 import json
 
 import elasticsearch.exceptions
-from elasticsearch import helpers, ConnectionError, Elasticsearch
+from elasticsearch import helpers, ConnectionError
 
-#from utils.connection_util import elastic_search_connection
-from backoff import backoff
+from utils.backoff_util import backoff
+from utils.connection_util import elastic_search_connection
+
 
 class Loader:
     def __init__(self, dsn, logger) -> None:
         self.dsn = dsn
         self.logger = logger
-        # при первичной инициализации класса Loader создадим (если нет) индекс movies в ElasticSearch
         self.create_index('movies')
 
     @backoff((ConnectionError,))
     def create_index(self, index_name: str) -> None:
-        """Создание ES индекса.
-           :param index_name: Наименование индекса.
-           :param mapping: Настройки индекса
-        """
+        """Создание ES индекса"""
         settings = {
             "refresh_interval": "1s",
             "analysis": {
@@ -126,20 +123,17 @@ class Loader:
             },
         }
 
-        # подключившись к ES
-        with Elasticsearch(self.dsn) as es:
+        with elastic_search_connection(self.dsn) as es:
             if not es.ping():
                 raise elasticsearch.exceptions.ConnectionError
-            # если нет индекса
             if not es.indices.exists(index='movies'):
-                # создаем индекс movies
-                es.indices.create(index=index_name, settings=settings,
-                                  mappings=mappings)
+                es.indices.create(index=index_name, settings=settings, mappings=mappings)
+                self.logger.info(f"Создание индекса {index_name} со следующими схемами:"
+                                 f"{json.dumps(settings, indent=2)} и {json.dumps(mappings, indent=2)} ")
 
     def load(self, data: list[dict]) -> None:
         """Загружаем данные пачками в ElasticSearch"""
         actions = [{'_index': 'movies', '_id': row['id'], '_source': row, } for row in data]
-        # подключившись к ElasticSearch
-        with Elasticsearch(self.dsn) as es:
-            # используя встроенные методы библиотеки elasticsearch грузим данные в ElasticSearch
+        with elastic_search_connection(self.dsn) as es:
             helpers.bulk(es, actions)
+            self.logger.info(f'загружено {len(data)} строк')

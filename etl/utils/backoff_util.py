@@ -1,6 +1,10 @@
 import time
 from functools import wraps
 
+from utils.logger_util import get_logger
+
+logger = get_logger(__name__)
+
 
 def backoff(exceptions, start_sleep_time=0.1, factor=2, border_sleep_time=10):
     """Перезапускает функцию в ответ на исключения от нее"""
@@ -13,6 +17,8 @@ def backoff(exceptions, start_sleep_time=0.1, factor=2, border_sleep_time=10):
                 try:
                     return func(*args, **kwargs)
                 except exceptions as e:
+                    logger.info(str(e))
+                    logger.warning(str(e))
                     sleep_time = sleep_time * factor
                     if sleep_time > border_sleep_time:
                         sleep_time = border_sleep_time
